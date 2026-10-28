@@ -1,0 +1,151 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// --------------------------------------------------------------------------
+// Enums (Prisma exige que se declaren antes de usarse)
+// --------------------------------------------------------------------------
+enum CitaEstado {
+  AGENDADA
+  CONFIRMADA
+  NO_SHOW
+  CANCELADA_POR_PACIENTE
+  CANCELADA_POR_CLINICA
+  COMPLETADA
+  REAGENDADA
+}
+
+enum EnvioEstado {
+  PENDIENTE
+  ENVIADO
+  LEIDO
+  FALLIDO
+  RESPONDIDO
+  OMITIDO
+}
+
+enum MensajeEstado {
+  ENVIADO
+  LEIDO
+  FALLIDO
+}
+
+enum DireccionMensaje {
+  IN
+  OUT
+}
+
+// --------------------------------------------------------------------------
+// Modelos
+// --------------------------------------------------------------------------
+model Paciente {
+  id               String    @id @default(uuid())
+  nombre           String
+  telefono         String?   @unique
+  consentWhatsapp  Boolean   @default(false)
+  nota             String?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  citas            Cita[]
+  sesiones         Sesion[]
+
+  @@map("pacientes")
+}
+
+model Tratamiento {
+  id                     String   @id @default(uuid())
+  nombre                 String   @unique
+  tipo                   String
+  totalSesiones          Int?
+  diasEntreSesiones      Int?
+  recordatorioProactivo  Boolean  @default(true)
+  createdAt              DateTime @default(now())
+
+  citas                  Cita[]
+
+  @@map("tratamientos")
+}
+
+model Cita {
+  id                  String        @id @default(uuid())
+  pacienteId          String
+  paciente            Paciente      @relation(fields: [pacienteId], references: [id], onDelete: Cascade)
+  calendarioEventId   String?       @unique
+  titulo              String
+  descripcion         String?
+  fecha               DateTime
+  tipo                String
+  tratamientoId       String?
+  tratamiento         Tratamiento?  @relation(fields: [tratamientoId], references: [id], onDelete: SetNull)
+  metadata            Json?
+  estado              CitaEstado    @default(AGENDADA)
+
+  recordatorios       RecordatorioEnvio[]
+  sesiones            Sesion[]
+  mensajes            Mensaje[]
+
+  createdAt           DateTime      @default(now())
+  updatedAt           DateTime      @updatedAt
+
+  @@index([fecha, estado])
+  @@index([pacienteId, fecha])
+  @@map("citas")
+}
+
+model RecordatorioEnvio {
+  id          String      @id @default(uuid())
+  citaId      String
+  cita        Cita        @relation(fields: [citaId], references: [id], onDelete: Cascade)
+  canal       String      @default("WHATSAPP")
+  disparador  String
+  contenido   String      @default("")
+  enviadoA    String?
+  estado      EnvioEstado @default(PENDIENTE)
+  intentos    Int         @default(0)
+  programadoPara DateTime?
+  enviadoEn   DateTime?
+  creadoAt    DateTime    @default(now())
+
+  @@unique([citaId, disparador])
+  @@index([citaId, estado])
+  @@map("recordatorios_envios")
+}
+
+model Sesion {
+  id          String   @id @default(uuid())
+  citaId      String
+  cita        Cita     @relation(fields: [citaId], references: [id], onDelete: Cascade)
+  pacienteId  String
+  paciente    Paciente @relation(fields: [pacienteId], references: [id], onDelete: Cascade)
+  fecha       DateTime
+  completada  Boolean  @default(false)
+  notas       String?
+  createdAt   DateTime @default(now())
+
+  @@index([citaId])
+  @@index([pacienteId, fecha])
+  @@map("sesiones")
+}
+
+model Mensaje {
+  id          String           @id @default(uuid())
+  citaId      String?
+  cita        Cita?            @relation(fields: [citaId], references: [id], onDelete: SetNull)
+  direccion   DireccionMensaje
+  telefono    String
+  tipo        String
+  contenido   String
+  estado      MensajeEstado    @default(ENVIADO)
+  proveedorId String?
+  createdAt   DateTime         @default(now())
+
+  @@index([telefono, createdAt])
+  @@index([citaId])
+  @@map("mensajes")
+}

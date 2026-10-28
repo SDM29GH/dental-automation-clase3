@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>Consultorio Dra. Laura · Panel</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🦷</text></svg>">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="barra">
+    <div class="marca">
+      <span class="logo" aria-hidden="true">🦷</span>
+      <div>
+        <strong>Consultorio Dra. Laura</strong>
+        <small id="fecha">Cargando agenda…</small>
+      </div>
+    </div>
+    <div class="barra-acciones">
+      <span class="conexion" id="conexion" title="Estado de la conexión">
+        <i aria-hidden="true"></i><span id="conexion-texto">Conectando…</span>
+      </span>
+      <button class="btn btn-fantasma" id="btn-refrescar" type="button">⟳ Actualizar</button>
+    </div>
+  </header>
+
+  <div id="aviso" class="aviso oculto" role="status"></div>
+
+  <nav class="pestanas" id="pestanas" aria-label="Secciones del panel">
+    <button class="pestana activa" type="button" data-tab="hoy">Hoy</button>
+    <button class="pestana" type="button" data-tab="pendientes">
+      Pendientes <span class="contador oculto" id="c-pendientes"></span>
+    </button>
+    <button class="pestana" type="button" data-tab="tratamientos">
+      Tratamientos <span class="contador oculto" id="c-tratamientos"></span>
+    </button>
+    <button class="pestana" type="button" data-tab="pacientes">Pacientes</button>
+    <button class="pestana" type="button" data-tab="conversaciones">
+      Conversaciones <span class="contador oculto" id="c-conversaciones"></span>
+    </button>
+  </nav>
+
+  <main id="vista" class="vista" aria-live="polite"></main>
+
+  <footer class="pie">
+    DentalCare Retention Engine · <span id="zona"></span> · se actualiza cada 30 segundos
+  </footer>
+
+  <dialog id="dialogo-mover" class="dialogo">
+    <form id="form-mover">
+      <h2>Mover cita</h2>
+      <p class="dialogo-paciente" id="mover-paciente"></p>
+      <div class="campos">
+        <label>Nueva fecha
+          <input type="date" name="fecha" required>
+        </label>
+        <label>Hora
+          <input type="time" name="hora" required step="300">
+        </label>
+      </div>
+      <p class="ayuda">Se mueve el mismo evento en Google Calendar, se recalculan los
+        recordatorios y se le avisa al paciente por WhatsApp.</p>
+      <div class="dialogo-acciones">
+        <button class="btn btn-fantasma" type="button" data-cerrar>Cancelar</button>
+        <button class="btn btn-primario" type="submit">Mover y avisar</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="dialogo-telefono" class="dialogo">
+    <form id="form-telefono">
+      <h2>Teléfono del paciente</h2>
+      <p class="dialogo-paciente" id="telefono-paciente"></p>
+      <div class="campos">
+        <label>WhatsApp
+          <input type="tel" name="telefono" required inputmode="tel" autocomplete="off"
+            placeholder="55 1234 5678">
+        </label>
+      </div>
+      <p class="ayuda">Acepta 10 dígitos o el número completo (+52 1 55 1234 5678).
+        Se guardan los últimos 10 dígitos y se envía con la lada del consultorio.</p>
+      <div class="dialogo-acciones">
+        <button class="btn btn-fantasma" type="button" data-cerrar>Cancelar</button>
+        <button class="btn btn-primario" type="submit">Guardar</button>
+      </div>
+    </form>
+  </dialog>
+
+  <div id="toast" class="toast oculto" role="status"></div>
+
+  <script src="app.js" defer></script>
+</body>
+</html>

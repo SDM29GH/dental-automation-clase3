@@ -1,0 +1,93 @@
+# =====================================================================
+# Docker Compose — DentalCare Retention Engine
+#
+#   postgres        → base de datos de la app (+ base propia de Evolution)
+#   evolution-api   → WhatsApp (Evolution API v2, sin Redis: caché local)
+#   app             → webhook + recordatorios + seguimiento
+#
+# Uso:
+#   docker compose up -d postgres
+#   npm run db:migrate        # primera vez, desde el host
+#   docker compose up -d
+# =====================================================================
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: dental-postgres
+    environment:
+      POSTGRES_USER: dental_user
+      POSTGRES_PASSWORD: dental_pass
+      POSTGRES_DB: dental_care
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      # Crea la base que Evolution API usa para sus propias sesiones.
+      - ./scripts/init-db.sql:/docker-entrypoint-initdb.d/10-init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U dental_user -d dental_care"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  evolution-api:
+    # Verifica el tag vigente en https://github.com/EvolutionAPI/evolution-api
+    image: atendai/evolution-api:v2.1.1
+    container_name: evolution-api
+    ports:
+      - "8080:8080"
+    environment:
+      SERVER_PORT: 8080
+      AUTHENTICATION_API_KEY: ${EVOLUTION_API_KEY:-dev-evolution-key}
+      # Persistencia en Postgres (no necesita Redis para un solo consultorio).
+      DATABASE_ENABLED: "true"
+      DATABASE_PROVIDER: postgresql
+      DATABASE_CONNECTION_URI: postgresql://dental_user:dental_pass@postgres:5432/evolution?schema=public
+      DATABASE_CONNECTION_CLIENT_NAME: evolution
+      CACHE_REDIS_ENABLED: "false"
+      CACHE_LOCAL_ENABLED: "true"
+      CONFIG_SESSION_PHONE_CLIENT: "Consultorio Dra. Laura"
+      CONFIG_SESSION_PHONE_NAME: "Chrome"
+      QRCODE_LIMIT: 30
+      LOG_LEVEL: ERROR
+      DEL_INSTANCE: "false"
+    volumes:
+      - evolution_instances:/evolution/instances
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: dental-app
+    ports:
+      # Panel en http://localhost:3000/panel
+      # Sin PANEL_PASSWORD en .env sólo acepta peticiones desde dentro del
+      # contenedor; define una contraseña para usarlo desde el navegador.
+      - "3000:3000"
+    env_file:
+      - .env
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgresql://dental_user:dental_pass@postgres:5432/dental_care?schema=public
+      EVOLUTION_API_URL: http://evolution-api:8080
+    depends_on:
+      postgres:
+        condition: service_healthy
+      evolution-api:
+        condition: service_started
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://localhost:3000/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  evolution_instances:

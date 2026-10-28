@@ -1,0 +1,35 @@
+import { defineConfig } from "vitest/config";
+
+export default defineConfig({
+  test: {
+    environment: "node",
+    include: ["tests/**/*.test.ts"],
+    setupFiles: ["tests/setup.ts"],
+    testTimeout: 15_000,
+    env: {
+      NODE_ENV: "test",
+      PORT: "3001",
+      TIMEZONE: "America/Mexico_City",
+      DATABASE_URL: "postgresql://test:test@localhost:5432/test?schema=public",
+      EVOLUTION_API_URL: "http://localhost:8080",
+      EVOLUTION_API_KEY: "test-key",
+      EVOLUTION_INSTANCE: "test-instance",
+      EVOLUTION_WEBHOOK_SECRET: "",
+      GOOGLE_CLIENT_ID: "test-client-id",
+      GOOGLE_CLIENT_SECRET: "test-client-secret",
+      GOOGLE_REFRESH_TOKEN: "",
+      CALENDAR_IDS: "primary",
+      LLM_PROVIDER: "openai",
+      LLM_BASE_URL: "https://api.openai.com/v1",
+      LLM_MODEL: "gpt-4o-mini",
+      LLM_API_KEY: "",
+      ADMIN_WEBHOOK: "",
+      ADMIN_EMAIL: "",
+      PANEL_USER: "asistente",
+      PANEL_PASSWORD: "",
+      SMTP_HOST: "",
+      SMTP_USER: "",
+      SMTP_PASS: "",
+    },
+  },
+});
