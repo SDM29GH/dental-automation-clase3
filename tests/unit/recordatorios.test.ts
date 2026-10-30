@@ -3,9 +3,12 @@ import {
   calcularMomento,
   construirTexto,
   DISPARADORES,
+  evaluarRecordatorio,
   proximoHorarioPermitido,
+  SIN_CONSENTIMIENTO,
 } from "../../src/scheduler/recordatorios.service.js";
 import { partesEnZona } from "../../src/utils/time.js";
+import { crearCita, TELEFONO } from "../helpers/fakes.js";
 
 const ZONA = "America/Mexico_City";
 const CITA = new Date("2026-11-05T16:00:00.000Z"); // 10:00 en CDMX
@@ -53,6 +56,107 @@ describe("construirTexto", () => {
     expect(construirTexto("D_MINUS_24H", "Ana María Ruiz Gómez", CITA)).toContain(
       "Hola Ana"
     );
+  });
+});
+
+describe("evaluarRecordatorio", () => {
+  const AHORA = new Date("2026-11-04T16:00:00.000Z"); // 10:00 CDMX del día anterior
+  const MANANA = new Date("2026-11-05T16:00:00.000Z"); // 10:00 CDMX
+
+  it("envía cuando hay consentimiento, teléfono y la cita sigue vigente", () => {
+    const evaluacion = evaluarRecordatorio(
+      crearCita({ fecha: MANANA }),
+      "D_MINUS_24H",
+      AHORA
+    );
+
+    expect(evaluacion).toEqual({ accion: "ENVIAR", telefono: TELEFONO });
+  });
+
+  it("omite sin consentimiento y explica por qué", () => {
+    const base = crearCita({ fecha: MANANA });
+    const evaluacion = evaluarRecordatorio(
+      crearCita({
+        fecha: MANANA,
+        paciente: { ...base.paciente, consentWhatsapp: false },
+      }),
+      "D_MINUS_24H",
+      AHORA
+    );
+
+    expect(evaluacion).toEqual({ accion: "OMITIR", motivo: SIN_CONSENTIMIENTO });
+  });
+
+  it("omite una cita cancelada", () => {
+    const evaluacion = evaluarRecordatorio(
+      crearCita({ fecha: MANANA, estado: "CANCELADA_POR_PACIENTE" }),
+      "D_MINUS_24H",
+      AHORA
+    );
+
+    expect(evaluacion).toEqual({
+      accion: "OMITIR",
+      motivo: "Cita en estado CANCELADA_POR_PACIENTE",
+    });
+  });
+
+  it("no vuelve a pedir confirmación si el paciente ya confirmó", () => {
+    const evaluacion = evaluarRecordatorio(
+      crearCita({ fecha: MANANA, estado: "CONFIRMADA" }),
+      "D_MINUS_24H",
+      AHORA
+    );
+
+    expect(evaluacion).toEqual({ accion: "OMITIR", motivo: "El paciente ya confirmó" });
+  });
+
+  it("sí envía el aviso de 2 horas aunque el paciente haya confirmado", () => {
+    const evaluacion = evaluarRecordatorio(
+      crearCita({ fecha: MANANA, estado: "CONFIRMADA" }),
+      "D_MINUS_2H",
+      AHORA
+    );
+
+    expect(evaluacion).toEqual({ accion: "ENVIAR", telefono: TELEFONO });
+  });
+
+  it("omite un recordatorio de 3 días que llega con menos de 48 horas", () => {
+    const casiManana = new Date(AHORA.getTime() + 47 * 3_600_000);
+    const evaluacion = evaluarRecordatorio(
+      crearCita({ fecha: casiManana }),
+      "D_MINUS_3D",
+      AHORA
+    );
+
+    expect(evaluacion).toEqual({
+      accion: "OMITIR",
+      motivo: "Ventana del recordatorio vencida",
+    });
+  });
+
+  it("omite una cita que ya pasó", () => {
+    const ayer = new Date(AHORA.getTime() - 2 * 3_600_000);
+    const evaluacion = evaluarRecordatorio(
+      crearCita({ fecha: ayer }),
+      "D_MINUS_0H",
+      AHORA
+    );
+
+    expect(evaluacion).toEqual({ accion: "OMITIR", motivo: "La cita ya pasó" });
+  });
+
+  it("marca sin teléfono cuando falta el número", () => {
+    const base = crearCita({ fecha: MANANA });
+    const evaluacion = evaluarRecordatorio(
+      crearCita({
+        fecha: MANANA,
+        paciente: { ...base.paciente, telefono: null },
+      }),
+      "D_MINUS_24H",
+      AHORA
+    );
+
+    expect(evaluacion).toEqual({ accion: "SIN_TELEFONO" });
   });
 });
 

@@ -182,16 +182,17 @@ export async function procesarRecordatoriosPendientes(
     const cita = recordatorio.cita as CitaConPaciente;
     const disparador = recordatorio.disparador as Disparador;
 
-    const motivoOmision = motivoParaOmitir(cita, disparador);
-    if (motivoOmision) {
+    const evaluacion = evaluarRecordatorio(cita, disparador, ahora);
+
+    if (evaluacion.accion === "OMITIR") {
       await prisma.recordatorioEnvio.update({
         where: { id: recordatorio.id },
-        data: { estado: "OMITIDO", contenido: motivoOmision, enviadoEn: ahora },
+        data: { estado: "OMITIDO", contenido: evaluacion.motivo, enviadoEn: ahora },
       });
       resumen.omitidos++;
 
       // Avisar una sola vez (en el recordatorio de 24 h) si falta consentimiento.
-      if (motivoOmision === SIN_CONSENTIMIENTO && disparador === "D_MINUS_24H") {
+      if (evaluacion.motivo === SIN_CONSENTIMIENTO && disparador === "D_MINUS_24H") {
         await AlertService.enviar({
           titulo: "Paciente sin consentimiento de WhatsApp",
           cuerpo:
@@ -205,8 +206,7 @@ export async function procesarRecordatoriosPendientes(
       continue;
     }
 
-    const telefono = cita.paciente.telefono;
-    if (!telefono) {
+    if (evaluacion.accion === "SIN_TELEFONO") {
       await prisma.recordatorioEnvio.update({
         where: { id: recordatorio.id },
         data: { estado: "FALLIDO", contenido: "Paciente sin teléfono", intentos: { increment: 1 } },
@@ -215,6 +215,7 @@ export async function procesarRecordatoriosPendientes(
       continue;
     }
 
+    const telefono = evaluacion.telefono;
     const texto = construirTexto(disparador, cita.paciente.nombre, cita.fecha);
 
     try {
@@ -270,7 +271,35 @@ export async function procesarRecordatoriosPendientes(
 
 export const SIN_CONSENTIMIENTO = "Sin consentimiento para WhatsApp";
 
-function motivoParaOmitir(cita: CitaConPaciente, disparador: Disparador): string | null {
+export type EvaluacionRecordatorio =
+  | { accion: "ENVIAR"; telefono: string }
+  | { accion: "OMITIR"; motivo: string }
+  | { accion: "SIN_TELEFONO" };
+
+/**
+ * Decide si un recordatorio debe salir. Se separa del envío para poder probar
+ * las reglas de negocio (consentimiento, estado de la cita, ventana) sin BD.
+ * `ahora` se inyecta para que las pruebas no dependan del reloj real.
+ */
+export function evaluarRecordatorio(
+  cita: CitaConPaciente,
+  disparador: Disparador,
+  ahora: Date = new Date()
+): EvaluacionRecordatorio {
+  const motivo = motivoParaOmitir(cita, disparador, ahora);
+  if (motivo) return { accion: "OMITIR", motivo };
+
+  const telefono = cita.paciente.telefono;
+  if (!telefono) return { accion: "SIN_TELEFONO" };
+
+  return { accion: "ENVIAR", telefono };
+}
+
+function motivoParaOmitir(
+  cita: CitaConPaciente,
+  disparador: Disparador,
+  ahora: Date
+): string | null {
   if (["CANCELADA_POR_PACIENTE", "CANCELADA_POR_CLINICA", "COMPLETADA", "NO_SHOW"].includes(cita.estado)) {
     return `Cita en estado ${cita.estado}`;
   }
@@ -279,7 +308,7 @@ function motivoParaOmitir(cita: CitaConPaciente, disparador: Disparador): string
     return SIN_CONSENTIMIENTO;
   }
   // Un recordatorio que llega después de la cita sólo confunde.
-  if (cita.fecha.getTime() < Date.now() - 3_600_000) {
+  if (cita.fecha.getTime() < ahora.getTime() - 3_600_000) {
     return "La cita ya pasó";
   }
   // No perseguir a quien ya confirmó.
@@ -287,7 +316,7 @@ function motivoParaOmitir(cita: CitaConPaciente, disparador: Disparador): string
     return "El paciente ya confirmó";
   }
   // Recordatorio de 3 días para una cita que ya es mañana: llega tarde.
-  if (disparador === "D_MINUS_3D" && cita.fecha.getTime() - Date.now() < 48 * 3_600_000) {
+  if (disparador === "D_MINUS_3D" && cita.fecha.getTime() - ahora.getTime() < 48 * 3_600_000) {
     return "Ventana del recordatorio vencida";
   }
   return null;

@@ -79,6 +79,39 @@ describe("procesarEntrante", () => {
     expect(resultado.respuesta).toContain("confirmada");
   });
 
+  it("confirma con el botón de WhatsApp sin escribir", async () => {
+    const { deps, registro, citas } = crearDependencias();
+
+    const resultado = await procesarEntrante(
+      entrante("Sí, asistiré", { esBoton: true, botonId: "confirmar_cita" }),
+      deps
+    );
+
+    expect(resultado.accion).toBe("CONFIRMADA");
+    expect(resultado.intento).toBe("CONFIRMAR");
+    expect(citas[0].estado).toBe("CONFIRMADA");
+    expect(
+      registro.mensajes.some((m) => m.direccion === "OUT" && m.tipo === "confirmacion")
+    ).toBe(true);
+  });
+
+  it("reprograma con el botón y mueve el mismo evento", async () => {
+    const { deps, registro, citas } = crearDependencias();
+    const fechaOriginal = citas[0].fecha;
+
+    const resultado = await procesarEntrante(
+      entrante("Necesito cambiarla", { esBoton: true, botonId: "reprogramar_cita" }),
+      deps
+    );
+
+    expect(resultado.accion).toBe("REPROGRAMADA");
+    expect(citas[0].estado).toBe("REAGENDADA");
+    expect(citas[0].fecha.getTime()).toBeGreaterThan(fechaOriginal.getTime());
+    expect(registro.eventos).toHaveLength(1);
+    expect(registro.eventos[0].tipo).toBe("mover");
+    expect(registro.recordatorios).toHaveLength(1);
+  });
+
   it("reprograma con lenguaje natural, mueve el evento y recalcula recordatorios", async () => {
     const { deps, registro, citas } = crearDependencias();
     const fechaOriginal = citas[0].fecha;
