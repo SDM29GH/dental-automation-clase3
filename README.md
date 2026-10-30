@@ -26,6 +26,22 @@ Ataca tres pérdidas concretas:
 
 ---
 
+## Desarrollo guiado por especificaciones (SDD)
+
+La funcionalidad principal no se mantiene “de memoria”: vive en una spec con
+criterios verificables.
+
+| Artefacto | Para qué |
+|---|---|
+| [`AGENTS.md`](AGENTS.md) | Contexto persistente: reglas de negocio, comandos, convenciones y flujo SDD obligatorio |
+| [`specs/001-recordatorios-inteligentes/spec.md`](specs/001-recordatorios-inteligentes/spec.md) | Problema, diseño y 5 criterios de aceptación ejecutables |
+| [`.opencode/skills/diseno-marca/SKILL.md`](.opencode/skills/diseno-marca/SKILL.md) | Marca, UI, tono y accesibilidad del panel y los mensajes |
+
+Regla del proyecto: **no se implementa nada sin spec**. Si cambia el
+comportamiento, se actualiza la spec en el mismo cambio.
+
+---
+
 ## Stack
 
 | Capa | Tecnología | Nota |
@@ -38,7 +54,7 @@ Ataca tres pérdidas concretas:
 | Agenda | Google Calendar API (OAuth2 + refresh token) | |
 | Panel | Express + HTML/CSS/JS sin framework | sin build, servido en `/panel` |
 | Scheduler | node-cron, zona del consultorio | |
-| Pruebas | Vitest + Supertest | 110 pruebas, sin infraestructura |
+| Pruebas | Vitest + Supertest | 120 pruebas, sin infraestructura |
 
 ---
 
@@ -67,7 +83,7 @@ Verificación sin credenciales externas:
 
 ```bash
 npm run demo     # conversación completa con dobles en memoria (no toca la BD)
-npm test         # 110 pruebas
+npm test         # 120 pruebas
 npm run build    # compila a dist/
 ```
 

@@ -98,7 +98,7 @@ dental-automation/
 ├── public/              panel (HTML/CSS/JS, sin build)
 ├── prisma/              esquema y migraciones de la base
 ├── scripts/             semilla, OAuth de Google, demo, instalación
-├── tests/               110 pruebas automáticas
+├── tests/               120 pruebas automáticas
 ├── docs/                arquitectura y flujos
 ├── docker-compose.yml   PostgreSQL + Evolution API + app
 ├── .env.example         plantilla de configuración
@@ -747,7 +747,7 @@ npm run dev
 ## 11. Pruebas y compilación
 
 ```powershell
-npm test            # 110 pruebas, no necesitan Docker ni credenciales
+npm test            # 120 pruebas, no necesitan Docker ni credenciales
 npm run typecheck   # TypeScript estricto
 npm run build       # compila a dist/
 npm run demo        # conversación de ejemplo sin infraestructura
@@ -938,7 +938,7 @@ docker compose ps
 | `npm run dev` | servidor en desarrollo con recarga |
 | `npm run build` | compilar a `dist/` |
 | `npm start` | ejecutar la versión compilada |
-| `npm test` | 110 pruebas automáticas |
+| `npm test` | 120 pruebas automáticas |
 | `npm run typecheck` | comprobar TypeScript |
 | `npm run demo` | conversación de ejemplo sin infraestructura |
 | `npm run db:migrate` | aplicar migraciones (desarrollo) |

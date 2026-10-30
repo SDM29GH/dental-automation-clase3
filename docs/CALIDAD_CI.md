@@ -9,7 +9,7 @@
 | Build | `npm run build` | problemas de ESM/rutas de importación que sólo aparecen al compilar |
 | Migración | `npm run db:migrate` | esquema inválido o deriva entre `schema.prisma` y la base |
 
-No hay ESLint instalado a propósito: con `strict: true` y 110 pruebas que ejercitan
+No hay ESLint instalado a propósito: con `strict: true` y 120 pruebas que ejercitan
 el flujo real, el retorno de un linter genérico no compensa el peso de otra
 dependencia. Si el equipo crece, se añade `typescript-eslint` sin tocar el código.
 
@@ -20,7 +20,7 @@ dependencia. Si el equipo crece, se añade `typescript-eslint` sin tocar el cód
                     │ integración HTTP (21)    │  supertest contra la app real,
                     │ tests/integration        │  con dobles en memoria
                     ├──────────────────────────┤
-                    │ unitarias (89)           │  funciones puras y flujos
+                    │ unitarias (99)           │  funciones puras y flujos
                     │ tests/unit               │  con repositorio falso
                     └──────────────────────────┘
 ```
@@ -30,7 +30,7 @@ dependencia. Si el equipo crece, se añade `typescript-eslint` sin tocar el cód
 | `tests/unit/time.test.ts` | conversión zona ↔ UTC, cambio de horario de verano, "hoy" del consultorio, formato en español |
 | `tests/unit/nlu.test.ts` | fechas y horas en lenguaje natural, precedencia de reglas, botones, extracción sin LLM |
 | `tests/unit/handler.test.ts` | parseo de payloads de Evolution (sobre y plano), confirmar/reprogramar/cancelar/duda, idempotencia, fallo de WhatsApp, escalado, cálculo de nueva fecha |
-| `tests/unit/recordatorios.test.ts` | escalera de 4 disparadores, copy por disparador, horario de silencio |
+| `tests/unit/recordatorios.test.ts` | escalera de 4 disparadores, copy por disparador, horario de silencio y elegibilidad (consentimiento, estado, ventana, sin teléfono) |
 | `tests/unit/protocolos.test.ts` | protocolos clínicos, coherencia de umbrales, textos de seguimiento, respuestas frecuentes |
 | `tests/unit/whatsapp.test.ts` | normalización del teléfono y lada de país al enviar |
 | `tests/integration/webhook.test.ts` | `POST /webhook/whatsapp` (200/401, sobre y payload plano), `/health`, 404 JSON |
