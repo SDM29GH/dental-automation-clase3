@@ -11,8 +11,8 @@
 |---|---|
 | **Plataforma elegida** | **Netlify** (recomendación del entregable y del proyecto) |
 | **Tipo de artefacto** | Build de producción del proyecto (`npm run build`) + publicación del bundle |
-| **URL de producción** | `https://dentalcare-retention-engine.netlify.app` |
-| **Sitio (site name)** | `dentalcare-retention-engine` |
+| **URL de producción** | `https://dental-automation-clase3.netlify.app/` |
+| **Sitio (site name)** | `dental-automation-clase3` |
 
 > Nota de arquitectura: el motor completo (Express + PostgreSQL + Evolution API +
 > Google Calendar) está diseñado para ejecutarse como proceso largo. Netlify se usa
@@ -50,7 +50,7 @@
 ```bash
 npm install -g netlify
 netlify login
-netlify link --site dentalcare-retention-engine
+netlify link --site dental-automation-clase3
 netlify deploy --prod
 ```
 
@@ -75,11 +75,11 @@ netlify deploy --prod
 
 ## 4. URL resultante
 
-**Producción:** <https://dentalcare-retention-engine.netlify.app>
+**Producción:** <https://dental-automation-clase3.netlify.app/>
 
-**Panel de la asistente:** <https://dentalcare-retention-engine.netlify.app/panel>
+**Panel de la asistente:** <https://dental-automation-clase3.netlify.app/panel>
 
-**Salud del servicio:** `GET https://dentalcare-retention-engine.netlify.app/health`
+**Salud del servicio:** `GET https://dental-automation-clase3.netlify.app/health`
 
 ---
 

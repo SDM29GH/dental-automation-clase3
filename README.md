@@ -23,7 +23,7 @@ Ataca tres pérdidas concretas:
 | **Parte 2 — Nueva SPEC** | [`specs/002-seguimiento-retencion-multisesion/spec.md`](specs/002-seguimiento-retencion-multisesion/spec.md) | Retención proactiva ante abandono en tratamientos multisesión: criterios de aceptación y métricas de éxito |
 | **Parte 3 — Lanzamiento a producción** | [`docs/DEPLOYAMIENTO.md`](docs/DEPLOYAMIENTO.md) + [`netlify.toml`](netlify.toml) | Plataforma Netlify, procedimiento de deploy, URL de producción |
 
-**URL de producción:** <https://dentalcare-retention-engine.netlify.app>
+**URL de producción:** <https://dental-automation-clase3.netlify.app/>
 
 ---
 
