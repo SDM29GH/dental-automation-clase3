@@ -154,14 +154,28 @@ function avisar(mensaje, tipo = "exito") {
 // ---------------------------------------------------------------------------
 
 async function api(ruta, opciones = {}) {
-  const respuesta = await fetch(`/api/panel${ruta}`, {
-    method: opciones.method ?? "GET",
-    headers: { "Content-Type": "application/json" },
-    body: opciones.body === undefined ? undefined : JSON.stringify(opciones.body),
-  });
+  let respuesta;
+  try {
+    respuesta = await fetch(`/api/panel${ruta}`, {
+      method: opciones.method ?? "GET",
+      headers: { "Content-Type": "application/json" },
+      body: opciones.body === undefined ? undefined : JSON.stringify(opciones.body),
+    });
+  } catch {
+    throw new Error(
+      "No hay conexión con el servidor del panel. Revisa que esté encendido y vuelve a intentar."
+    );
+  }
 
   if (respuesta.status === 401) {
     throw new Error("Sesión no autorizada. Recarga la página e inicia sesión.");
+  }
+
+  if (respuesta.status === 404) {
+    throw new Error(
+      "Esta publicación es sólo la portada: el motor del consultorio no está conectado aquí. " +
+        "El panel en vivo corre en la computadora del consultorio."
+    );
   }
 
   const cuerpo = await respuesta.json().catch(() => ({}));
