@@ -1,0 +1,23 @@
+# Netlify — DentalCare Retention Engine
+# Documentación y configuración base del despliegue a producción (Parte 3).
+
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+[build.environment]
+  NODE_VERSION = "22"
+  PORT = "3000"
+
+[context.production]
+  command = "npm run build"
+  publish = "dist"
+
+[context.deploy-preview]
+  command = "npm run build"
+  publish = "dist"
+
+[[headers]]
+  for = "/health"
+  [headers.values]
+    Cache-Control = "no-store"

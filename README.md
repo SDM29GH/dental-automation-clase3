@@ -15,6 +15,18 @@ Ataca tres pérdidas concretas:
 
 ---
 
+## Entregables — Clase 3 (Infra for AI Products)
+
+| Entregable | Ubicación | Contenido |
+|---|---|---|
+| **Parte 1 — ICP y user personas** | [`docs/01-icp-y-user-personas.md`](docs/01-icp-y-user-personas.md) | ICP del consultorio, personas (Dra. Laura, asistente, paciente), supuestos y límites |
+| **Parte 2 — Nueva SPEC** | [`specs/002-seguimiento-retencion-multisesion/spec.md`](specs/002-seguimiento-retencion-multisesion/spec.md) | Retención proactiva ante abandono en tratamientos multisesión: criterios de aceptación y métricas de éxito |
+| **Parte 3 — Lanzamiento a producción** | [`docs/DEPLOYAMIENTO.md`](docs/DEPLOYAMIENTO.md) + [`netlify.toml`](netlify.toml) | Plataforma Netlify, procedimiento de deploy, URL de producción |
+
+**URL de producción:** <https://dentalcare-retention-engine.netlify.app>
+
+---
+
 ## Cómo funciona (en una frase por pieza)
 
 - **Google Calendar manda.** Se sincroniza a Postgres cada mañana; la base permite razonar sobre citas, y los cambios del paciente se escriben de vuelta al calendario.

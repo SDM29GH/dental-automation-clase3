@@ -241,6 +241,9 @@ Un cambio está terminado cuando:
 | Flujos conversacionales | `docs/FLUJOS_CONVERSACIONALES.md` |
 | Calidad y pirámide de pruebas | `docs/CALIDAD_CI.md` |
 | La funcionalidad principal, especificada | `specs/001-recordatorios-inteligentes/spec.md` |
+| ICP y user personas (Clase 3) | `docs/01-icp-y-user-personas.md` |
+| Nueva SPEC (retención, Clase 3) | `specs/002-seguimiento-retencion-multisesion/spec.md` |
+| Despliegue a producción (Netlify) | `docs/DEPLOYAMIENTO.md`, `netlify.toml` |
 | Diseñar o revisar UI | `.opencode/skills/diseno-marca/SKILL.md` |
 
 ---
@@ -250,3 +253,4 @@ Un cambio está terminado cuando:
 | Fecha | Cambio |
 |---|---|
 | 2026-10-30 | Creación del contexto persistente y del flujo SDD obligatorio. |
+| 2026-11-04 | Entregables de Clase 3: ICP y user personas (`docs/01-icp-y-user-personas.md`), nueva SPEC (`specs/002-seguimiento-retencion-multisesion/spec.md`) y despliegue Netlify (`netlify.toml`, `docs/DEPLOYAMIENTO.md`). |
