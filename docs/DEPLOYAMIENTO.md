@@ -30,7 +30,7 @@
 3. Conectar el repositorio: `SDM29GH/dental-automation-clase3`.
 4. Configuración de build:
    - **Build command:** `npm run build`
-   - **Publish directory:** `dist`
+   - **Publish directory:** `public`
    - **Node version:** `22`
 5. Variables de entorno (añadir en *Site settings → Environment variables*):
    - `NODE_ENV=production`
