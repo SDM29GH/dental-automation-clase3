@@ -32,8 +32,9 @@ services:
       retries: 5
 
   evolution-api:
-    # Verifica el tag vigente en https://github.com/EvolutionAPI/evolution-api
-    image: atendai/evolution-api:v2.1.1
+    # Imagen oficial vigente (el repositorio atendai/evolution-api ya no
+    # existe en Docker Hub). Verifica el tag en https://hub.docker.com/r/evoapicloud/evolution-api
+    image: evoapicloud/evolution-api:v2.3.7
     container_name: evolution-api
     ports:
       - "8080:8080"
