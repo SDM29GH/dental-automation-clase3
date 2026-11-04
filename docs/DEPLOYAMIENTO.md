@@ -83,10 +83,39 @@ netlify deploy --prod
 
 ---
 
-## 5. Estado de la puesta en producción en este entorno
+## 5. Corrección aplicada al directorio de publicación
 
-> Registro técnico del entregable: la ejecución del deploy desde este entorno
-> requiere autenticación de la cuenta de Netlify (`netlify login` / token de
-> despliegue). La configuración de producción (`netlify.toml`, procedimiento,
-> variables y URL) queda definida en este repositorio para completar el paso con
-> la cuenta del consultorio.
+**Síntoma:** `https://dental-automation-clase3.netlify.app/` devolvía la página
+404 de Netlify (`Page not found`) aunque el deploy aparecía como *Published*.
+
+**Causa:** el proyecto en Netlify tenía configurado en la interfaz
+(*Project configuration → Build settings*) **`Publish directory: dist`**.
+`dist/` sólo contiene el JavaScript compilado por `tsc`, sin `index.html`, así que
+Netlify publicaba un sitio vacío en la raíz.
+
+**Corrección:**
+
+1. En la interfaz de Netlify: **Project configuration → Build settings →
+   Configure** → **Publish directory: `public`** (contiene `index.html`,
+   `styles.css` y `app.js` del panel) → **Save**.
+2. Netlify **reutiliza los archivos subidos cuando el commit no cambia**
+   (mensaje *"All files already uploaded by a previous deploy with the same
+   commits"*), por lo que cambiar la configuración no basta: hay que generar un
+   **commit nuevo** (o usar *Trigger deploy → Deploy project without cache*) para
+   que reconstruya con el directorio correcto.
+
+> `netlify.toml` fija `publish = "public"` como referencia versionada; el sitio
+> en Netlify estaba creado sin usar el archivo de configuración
+> (`configuration_file_path: null`), por eso el ajuste se hizo también en la
+> interfaz.
+
+---
+
+## 6. Estado de la puesta en producción
+
+- **Sitio publicado:** <https://dental-automation-clase3.netlify.app/>
+- **Repositorio:** `SDM29GH/dental-automation-clase3` (rama `main`).
+- **Rama de producción:** `main`, con auto-publicación activada.
+- La ejecución del deploy desde la CLI requiere autenticación de la cuenta
+  (`netlify login` / token de despliegue); desde la interfaz se hizo con la
+  sesión del equipo.
