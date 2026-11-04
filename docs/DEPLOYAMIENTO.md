@@ -127,3 +127,24 @@ todos los contextos, en sincronía con el valor de la interfaz. `public/` contie
 - La ejecución del deploy desde la CLI requiere autenticación de la cuenta
   (`netlify login` / token de despliegue); desde la interfaz se hizo con la
   sesión del equipo.
+- **Alcance real de esta URL:** portada estática del proyecto (`public/`).
+  El motor completo (Express + PostgreSQL + Evolution) corre en local;
+  `/panel`, `/health` y el QR de WhatsApp no existen en Netlify.
+
+---
+
+## 7. Siguientes pasos (pendiente — acordado, no implementado)
+
+Para que la URL pública muestre el panel **con datos vivos** y/o el QR
+funcione fuera de local, hace falta alojar el backend en un proceso
+continuo. Opciones evaluadas el 2026-11-04:
+
+| Opción | Notas |
+|---|---|
+| **Railway / Fly.io / VPS con Docker** | Corre `docker compose` completo (app + Postgres + Evolution). Es la única forma de que **el QR de WhatsApp funcione**: Evolution necesita un proceso vivo con WebSocket; **no puede vivir en serverless**. |
+| **Netlify Functions (serverless)** | Sólo para endpoints de **lectura** del panel (`/api/panel/*`) con Postgres en la nube (Neon/Supabase) y pooling de Prisma. Requiere spec nueva (`003-panel-serverless`). Los recordatorios podrían migrar a Scheduled Functions. |
+| **Túnel (ngrok / Cloudflare Tunnel)** | Exponer el motor local con URL pública para pruebas sin mudar infraestructura. |
+
+**Regla de arquitectura confirmada:** Netlify sirve estático; el QR y el
+ciclo de WhatsApp requieren host con proceso continuo. No intentar meter
+Evolution en funciones serverless.
