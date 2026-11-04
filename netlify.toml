@@ -3,7 +3,7 @@
 
 [build]
   command = "npm run build"
-  publish = "dist"
+  publish = "public"
 
 [build.environment]
   NODE_VERSION = "22"
@@ -11,11 +11,11 @@
 
 [context.production]
   command = "npm run build"
-  publish = "dist"
+  publish = "public"
 
 [context.deploy-preview]
   command = "npm run build"
-  publish = "dist"
+  publish = "public"
 
 [[headers]]
   for = "/health"

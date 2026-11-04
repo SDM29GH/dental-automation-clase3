@@ -77,37 +77,45 @@ netlify deploy --prod
 
 **Producción:** <https://dental-automation-clase3.netlify.app/>
 
-**Panel de la asistente:** <https://dental-automation-clase3.netlify.app/panel>
+La raíz sirve la página estática del proyecto (`public/index.html`).
 
-**Salud del servicio:** `GET https://dental-automation-clase3.netlify.app/health`
+> Nota: `/panel` y `/health` son endpoints del servidor Express (backend con
+> PostgreSQL, WhatsApp y Calendar); en el sitio estático de Netlify no existen.
+> El panel completo se ejecuta en local (`http://localhost:3000/panel`) o en el
+> host donde corra el motor.
 
 ---
 
-## 5. Corrección aplicada al directorio de publicación
+## 5. Corrección del 404 en la raíz (causa raíz)
 
 **Síntoma:** `https://dental-automation-clase3.netlify.app/` devolvía la página
 404 de Netlify (`Page not found`) aunque el deploy aparecía como *Published*.
 
-**Causa:** el proyecto en Netlify tenía configurado en la interfaz
-(*Project configuration → Build settings*) **`Publish directory: dist`**.
-`dist/` sólo contiene el JavaScript compilado por `tsc`, sin `index.html`, así que
-Netlify publicaba un sitio vacío en la raíz.
+**Diagnóstico (evidencia):**
 
-**Corrección:**
+1. El explorador de archivos de Netlify mostraba **129 archivos**: todo el
+   JavaScript compilado de `dist/` (`src/`, `tests/`, `scripts/`) más
+   `netlify.toml`, y **ningún `index.html`**.
+2. En vivo: `/src/index.js` respondía 200 (contenido de `dist`), mientras
+   `/public/index.html` y `/netlify.toml` respondían 404.
+3. El archivo **`netlify.toml` tenía `publish = "dist"`** en `[build]`,
+   `[context.production]` y `[context.deploy-preview]`.
 
-1. En la interfaz de Netlify: **Project configuration → Build settings →
-   Configure** → **Publish directory: `public`** (contiene `index.html`,
-   `styles.css` y `app.js` del panel) → **Save**.
-2. Netlify **reutiliza los archivos subidos cuando el commit no cambia**
-   (mensaje *"All files already uploaded by a previous deploy with the same
-   commits"*), por lo que cambiar la configuración no basta: hay que generar un
-   **commit nuevo** (o usar *Trigger deploy → Deploy project without cache*) para
-   que reconstruya con el directorio correcto.
+**Causa:** Netlify **sí lee `netlify.toml`** (se evidenció al procesar su regla
+de headers para `/health`) y **el archivo manda sobre el valor de la interfaz**.
+Aunque en *Project configuration → Build settings* se guardó
+`Publish directory: public`, la publicación real seguía siendo `dist`, que sólo
+contiene el backend compilado sin `index.html`, produce un sitio vacío en la
+raíz → 404 permanente.
 
-> `netlify.toml` fija `publish = "public"` como referencia versionada; el sitio
-> en Netlify estaba creado sin usar el archivo de configuración
-> (`configuration_file_path: null`), por eso el ajuste se hizo también en la
-> interfaz.
+**Corrección:** `netlify.toml` ahora fija `publish = "public"` en `[build]` y en
+todos los contextos, en sincronía con el valor de la interfaz. `public/` contiene
+`index.html`, `styles.css` y `app.js` del panel.
+
+> Lección: al diagnosticar un deploy, verificar **qué se publicó de verdad**
+> (explorador de archivos del deploy + URLs vivas), no sólo el valor de la
+> configuración en la UI. Si interfaz y `netlify.toml` discrepan, gana el
+> archivo versionado.
 
 ---
 
